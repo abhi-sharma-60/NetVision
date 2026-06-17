@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from analytics import analytics_engine
 
 app = FastAPI(
     title="NetVision AI API",
@@ -23,3 +24,13 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "NetVision API"}
+
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SUMMARY_FILE = os.path.join(BASE_DIR, "logs", "analytics_summary.json")
+
+@app.get("/analytics/overview")
+async def get_analytics_overview():
+    """Returns real-time aggregated network traffic metrics."""
+    return analytics_engine.load_summary(SUMMARY_FILE)

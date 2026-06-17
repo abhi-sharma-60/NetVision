@@ -54,10 +54,15 @@ def parse_packet(packet):
 
 import json
 import os
+from analytics import analytics_engine
+
+# Robust absolute paths
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_FILE = os.path.join(BASE_DIR, "logs", "packets.json")
+SUMMARY_FILE = os.path.join(BASE_DIR, "logs", "analytics_summary.json")
 
 # Global in-memory store for packets
 packet_store = []
-LOG_FILE = "backend/logs/packets.json"
 
 # Ensure log directory exists
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
@@ -80,6 +85,10 @@ def store_packet(parsed_data):
     }
     
     packet_store.append(metadata)
+    analytics_engine.process_packet(metadata)
+    
+    # Export running totals for the FastAPI server to read instantly
+    analytics_engine.export_summary(SUMMARY_FILE)
     
     # Append to log file (this will serve as our dataset for ML later)
     try:
