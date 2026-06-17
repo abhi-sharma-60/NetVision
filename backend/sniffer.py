@@ -52,6 +52,42 @@ def parse_packet(packet):
 
     return packet_info
 
+import json
+import os
+
+# Global in-memory store for packets
+packet_store = []
+LOG_FILE = "backend/logs/packets.json"
+
+# Ensure log directory exists
+os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+
+def store_packet(parsed_data):
+    """
+    Stores the extracted metadata (ip, port, protocol, timestamp, size)
+    in memory and appends it to a JSON log file.
+    """
+    # Create the exact metadata structure requested
+    metadata = {
+        "timestamp": parsed_data["timestamp"],
+        "src_ip": parsed_data["src_ip"],
+        "dst_ip": parsed_data["dst_ip"],
+        "src_port": parsed_data["src_port"],
+        "dst_port": parsed_data["dst_port"],
+        "protocol": parsed_data["protocol"],
+        "size": parsed_data["size"],
+        "info": parsed_data["info"]
+    }
+    
+    packet_store.append(metadata)
+    
+    # Append to log file (this will serve as our dataset for ML later)
+    try:
+        with open(LOG_FILE, "a") as f:
+            f.write(json.dumps(metadata) + "\n")
+    except Exception as e:
+        print(f"Failed to write to log: {e}")
+
 def packet_callback(packet):
     """
     Callback function that processes each captured packet.
@@ -62,7 +98,10 @@ def packet_callback(packet):
         sport = f":{parsed_data['src_port']}" if parsed_data['src_port'] else ""
         dport = f":{parsed_data['dst_port']}" if parsed_data['dst_port'] else ""
         
-        print(f"[{parsed_data['protocol']}] {parsed_data['src_ip']}{sport} --> {parsed_data['dst_ip']}{dport} | Size: {parsed_data['size']} bytes | {parsed_data['info']}")
+        print(f"[{parsed_data['protocol']}] {parsed_data['src_ip']}{sport} --> {parsed_data['dst_ip']}{dport} | Size: {parsed_data['size']} bytes")
+        
+        # Store the extracted metadata
+        store_packet(parsed_data)
 
 def start_sniffing(interface=None):
     """
