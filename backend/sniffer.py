@@ -52,6 +52,7 @@ def parse_packet(packet):
 
     return packet_info
 
+import requests
 import json
 import os
 from analytics import analytics_engine
@@ -69,10 +70,8 @@ os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
 def store_packet(parsed_data):
     """
-    Stores the extracted metadata (ip, port, protocol, timestamp, size)
-    in memory and appends it to a JSON log file.
+    Stores the extracted metadata, updates analytics, and pushes to API.
     """
-    # Create the exact metadata structure requested
     metadata = {
         "timestamp": parsed_data["timestamp"],
         "src_ip": parsed_data["src_ip"],
@@ -89,6 +88,12 @@ def store_packet(parsed_data):
     
     # Export running totals for the FastAPI server to read instantly
     analytics_engine.export_summary(SUMMARY_FILE)
+
+    # Push to API for real-time Socket.IO broadcast
+    try:
+        requests.post("http://localhost:8000/api/ingest", json=metadata, timeout=0.1)
+    except:
+        pass
     
     # Append to log file (this will serve as our dataset for ML later)
     try:
