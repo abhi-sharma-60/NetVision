@@ -10,6 +10,7 @@ import ThreatDashboard from './pages/ThreatDashboard';
 import TopologyMap from './pages/TopologyMap';
 import GeoMap from './pages/GeoMap';
 import DeviceDiscovery from './pages/DeviceDiscovery';
+import LandingPage from './pages/LandingPage';
 import CopilotWidget from './components/CopilotWidget';
 function Layout({ isDark, setIsDark, isConnected }) {
   return (
@@ -124,7 +125,8 @@ function App() {
       <Routes>
         <Route element={<Layout isDark={isDark} setIsDark={setIsDark} isConnected={isConnected} />}>
           <Route path="/" element={<Outlet context={{ analytics, livePackets, chartData, threatAlerts, threatIntel }} />}>
-            <Route index element={<Dashboard />} />
+            <Route index element={<LandingPage />} />
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="monitor" element={<TrafficMonitor />} />
             <Route path="topology" element={<TopologyMap />} />
             <Route path="geo" element={<GeoMap />} />

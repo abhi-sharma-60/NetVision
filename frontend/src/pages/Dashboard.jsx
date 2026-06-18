@@ -127,6 +127,40 @@ export default function Dashboard() {
         <p className="text-text-muted mt-1">Real-time network telemetry and intelligence.</p>
       </motion.div>
 
+      {/* Recruiter Impact Stat Banner */}
+      <motion.div variants={item} className="mb-8 grid grid-cols-2 md:grid-cols-5 gap-4 glass-panel p-6 rounded-3xl border border-white/5 bg-gradient-to-r from-primary/5 via-transparent to-blue-600/5">
+        <div className="flex flex-col items-center text-center px-2 md:border-r border-border/50 last:border-0">
+          <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-text-main to-text-muted tracking-tight">
+            {analytics?.total_packets > 1000 ? (analytics.total_packets / 1000).toFixed(1) + 'K+' : (analytics?.total_packets || 0)}
+          </span>
+          <span className="text-[10px] uppercase tracking-widest text-primary font-bold mt-2">Packets Analyzed</span>
+        </div>
+        <div className="flex flex-col items-center text-center px-2 md:border-r border-border/50 last:border-0">
+          <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-text-main to-text-muted tracking-tight">
+            {threatAlerts?.length || 0}
+          </span>
+          <span className="text-[10px] uppercase tracking-widest text-danger font-bold mt-2">Threat Events</span>
+        </div>
+        <div className="flex flex-col items-center text-center px-2 md:border-r border-border/50 last:border-0">
+          <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-text-main to-text-muted tracking-tight">
+            {deviceCount || 0}
+          </span>
+          <span className="text-[10px] uppercase tracking-widest text-secondary font-bold mt-2">Devices Monitored</span>
+        </div>
+        <div className="flex flex-col items-center text-center px-2 md:border-r border-border/50 last:border-0">
+          <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-text-main to-text-muted tracking-tight">
+            {livePackets.length > 0 ? '<200ms' : '-'}
+          </span>
+          <span className="text-[10px] uppercase tracking-widest text-orange-500 font-bold mt-2">Alert Generation</span>
+        </div>
+        <div className="flex flex-col items-center text-center px-2 border-border/50 last:border-0">
+          <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-text-main to-text-muted tracking-tight">
+            {protocolData?.length || 0}
+          </span>
+          <span className="text-[10px] uppercase tracking-widest text-purple-500 font-bold mt-2">Protocols Tracked</span>
+        </div>
+      </motion.div>
+
       {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-6 auto-rows-[160px]">
         

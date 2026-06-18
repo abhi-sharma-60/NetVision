@@ -1,11 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Activity, Network, Map, MonitorSmartphone, ShieldAlert } from 'lucide-react';
+import { Home, LayoutDashboard, Activity, Network, Map, MonitorSmartphone, ShieldAlert } from 'lucide-react';
 
 export default function FloatingDock() {
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { name: 'Home', path: '/', icon: Home, color: 'text-primary', bg: 'bg-primary/10' },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, color: 'text-blue-500', bg: 'bg-blue-500/10' },
     { name: 'Monitor', path: '/monitor', icon: Activity, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
     { name: 'Topology', path: '/topology', icon: Network, color: 'text-purple-500', bg: 'bg-purple-500/10' },
     { name: 'Geo Map', path: '/geo', icon: Map, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
