@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import {
   ReactFlow,
@@ -12,6 +12,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { Monitor, Server, Router as RouterIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const isInternal = (ip) => {
   if (!ip) return false;
@@ -24,11 +25,13 @@ const isInternal = (ip) => {
 
 // --- Custom Nodes ---
 const ClientNode = ({ data }) => (
-  <div className="bg-surface border border-primary/50 shadow-[0_0_15px_rgba(59,130,246,0.3)] rounded-xl p-3 min-w-[150px]">
+  <div className="glass-panel border-primary/40 rounded-xl p-3 min-w-[160px] relative group cursor-pointer transition-colors hover:border-primary/80">
+    <div className="absolute inset-0 bg-primary/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
     <Handle type="source" position={Position.Right} className="w-2 h-2 !bg-primary border-0" />
-    <div className="flex items-center gap-3">
-      <div className="p-2 bg-primary/20 rounded-lg text-primary">
-        <Monitor className="w-5 h-5" />
+    <div className="flex items-center gap-3 relative z-10">
+      <div className="p-2 bg-primary/20 rounded-lg text-primary relative">
+        <div className="absolute inset-0 bg-primary/40 blur-md rounded-lg animate-pulse"></div>
+        <Monitor className="w-5 h-5 relative z-10" />
       </div>
       <div>
         <div className="text-xs font-bold text-text-main">Local Device</div>
@@ -39,15 +42,17 @@ const ClientNode = ({ data }) => (
 );
 
 const RouterNode = ({ data }) => (
-  <div className="bg-surface border border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.4)] rounded-xl p-4 min-w-[180px]">
+  <div className="glass-panel border-purple-500/40 rounded-xl p-4 min-w-[200px] relative group cursor-pointer transition-colors hover:border-purple-500/80">
+    <div className="absolute inset-0 bg-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
     <Handle type="target" position={Position.Left} className="w-2 h-2 !bg-purple-500 border-0" />
     <Handle type="source" position={Position.Right} className="w-2 h-2 !bg-purple-500 border-0" />
-    <div className="flex items-center gap-3">
-      <div className="p-2.5 bg-purple-500/20 rounded-lg text-purple-400">
-        <RouterIcon className="w-6 h-6" />
+    <div className="flex items-center gap-4 relative z-10">
+      <div className="p-3 bg-purple-500/20 rounded-lg text-purple-400 relative">
+        <div className="absolute inset-0 bg-purple-500/40 blur-lg rounded-lg animate-pulse"></div>
+        <RouterIcon className="w-6 h-6 relative z-10" />
       </div>
       <div>
-        <div className="text-sm font-bold text-text-main">Core Gateway</div>
+        <div className="text-sm font-bold text-text-main tracking-wide">Core Gateway</div>
         <div className="text-xs font-mono text-purple-400">Enterprise Edge</div>
       </div>
     </div>
@@ -55,11 +60,13 @@ const RouterNode = ({ data }) => (
 );
 
 const ServerNode = ({ data }) => (
-  <div className="bg-surface border border-orange-500/50 shadow-[0_0_15px_rgba(249,115,22,0.3)] rounded-xl p-3 min-w-[150px]">
+  <div className="glass-panel border-orange-500/40 rounded-xl p-3 min-w-[160px] relative group cursor-pointer transition-colors hover:border-orange-500/80">
+    <div className="absolute inset-0 bg-orange-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
     <Handle type="target" position={Position.Left} className="w-2 h-2 !bg-orange-500 border-0" />
-    <div className="flex items-center gap-3">
-      <div className="p-2 bg-orange-500/20 rounded-lg text-orange-500">
-        <Server className="w-5 h-5" />
+    <div className="flex items-center gap-3 relative z-10">
+      <div className="p-2 bg-orange-500/20 rounded-lg text-orange-500 relative">
+        <div className="absolute inset-0 bg-orange-500/40 blur-md rounded-lg animate-pulse"></div>
+        <Server className="w-5 h-5 relative z-10" />
       </div>
       <div>
         <div className="text-xs font-bold text-text-main">External Host</div>
@@ -86,74 +93,87 @@ export default function TopologyMap() {
     const ips = new Set();
     
     // Default Gateway router node
-    const newNodes = [
-      { id: 'router', type: 'routerNode', position: { x: 450, y: 300 }, data: { label: 'Gateway' } }
+    const baseNodes = [
+      { id: 'router', type: 'routerNode', position: { x: 500, y: 350 }, data: { label: 'Gateway' } }
     ];
     const newEdges = [];
 
-    // Extract unique IPs from the last 50 packets
     livePackets.forEach(p => {
       if (p.src_ip) ips.add(p.src_ip);
       if (p.dst_ip) ips.add(p.dst_ip);
     });
 
-    let clientY = 50;
-    let serverY = 50;
+    let clientY = 100;
+    let serverY = 100;
 
     const uniqueIps = Array.from(ips);
     
     uniqueIps.forEach(ip => {
       const internal = isInternal(ip);
       if (internal) {
-        newNodes.push({
+        baseNodes.push({
           id: ip,
           type: 'clientNode',
-          position: { x: 50, y: clientY },
+          position: { x: 100, y: clientY },
           data: { label: ip }
         });
-        clientY += 100;
+        clientY += 120;
         
         newEdges.push({
           id: `edge-client-${ip}`,
           source: ip,
           target: 'router',
           animated: true,
-          style: { stroke: '#3b82f6', strokeWidth: 2 }
+          style: { stroke: 'var(--color-primary)', strokeWidth: 2, opacity: 0.6 }
         });
       } else {
-        newNodes.push({
+        baseNodes.push({
           id: ip,
           type: 'serverNode',
-          position: { x: 850, y: serverY },
+          position: { x: 900, y: serverY },
           data: { label: ip }
         });
-        serverY += 100;
+        serverY += 120;
         
         newEdges.push({
           id: `edge-server-${ip}`,
           source: 'router',
           target: ip,
           animated: true,
-          style: { stroke: '#f97316', strokeWidth: 2 }
+          style: { stroke: 'var(--color-warning)', strokeWidth: 2, opacity: 0.6 }
         });
       }
     });
 
-    // Only update if the number of unique IPs changed to avoid constant layout jumping,
-    // or we can just blindly update if we want real-time. Since XY flow keeps nodes static if IDs match,
-    // it's safe to call setNodes.
-    setNodes(newNodes);
+    setNodes((prevNodes) => {
+      const prevNodesMap = new Map(prevNodes.map(n => [n.id, n]));
+      return baseNodes.map(n => {
+        if (prevNodesMap.has(n.id)) {
+          const prevNode = prevNodesMap.get(n.id);
+          return { ...n, position: prevNode.position, selected: prevNode.selected, dragging: prevNode.dragging };
+        }
+        return n;
+      });
+    });
+
     setEdges(newEdges);
   }, [livePackets, setNodes, setEdges]);
 
   return (
-    <div className="h-full flex flex-col space-y-4 animate-in fade-in duration-500">
-      <div>
-        <h2 className="text-2xl font-bold text-text-main mb-2">Network Topology</h2>
-        <p className="text-text-muted">Live mapping of connected internal devices and external servers.</p>
-      </div>
+    <div className="absolute inset-0 overflow-hidden bg-background">
+      
+      {/* Floating Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="absolute top-8 left-8 z-10 glass-panel px-6 py-4 rounded-2xl pointer-events-none"
+      >
+        <h2 className="text-2xl font-light text-text-main tracking-tight">Network <span className="font-semibold text-primary">Topology</span></h2>
+        <p className="text-xs text-text-muted mt-1 uppercase tracking-widest font-semibold">Live Traffic Vectors</p>
+      </motion.div>
 
-      <div className="flex-1 bg-surface border border-border rounded-2xl shadow-md overflow-hidden relative">
+      {/* Main Canvas */}
+      <div className="w-full h-full">
         {nodes.length > 0 && (
           <ReactFlow
             nodes={nodes}
@@ -162,18 +182,22 @@ export default function TopologyMap() {
             onEdgesChange={onEdgesChange}
             nodeTypes={nodeTypes}
             fitView
-            className="bg-background/30"
+            proOptions={{ hideAttribution: true }}
+            className="mesh-bg"
           >
-            <Background color="var(--border-subtle)" gap={24} size={2} />
-            <Controls className="bg-surface border-border fill-text-main" />
+            <Background color="var(--text-muted)" gap={32} size={1} opacity={0.2} />
+            
+            <Controls className="glass-panel border-border fill-text-main !shadow-2xl rounded-xl overflow-hidden m-6" />
+            
             <MiniMap 
-              className="bg-surface border border-border rounded-xl shadow-lg"
+              position="top-right"
+              className="glass-panel border-border !rounded-2xl shadow-2xl m-6"
               nodeColor={(n) => {
-                if (n.type === 'routerNode') return '#a855f7';
-                if (n.type === 'clientNode') return '#3b82f6';
-                return '#f97316';
+                if (n.type === 'routerNode') return 'var(--color-purple-500)';
+                if (n.type === 'clientNode') return 'var(--color-primary)';
+                return 'var(--color-warning)';
               }}
-              maskColor="var(--bg-background)"
+              maskColor="var(--bg-surface-glass)"
             />
           </ReactFlow>
         )}

@@ -3,53 +3,43 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { io } from 'socket.io-client';
 
-import Sidebar from './components/Sidebar';
+import FloatingDock from './components/FloatingDock';
 import Dashboard from './pages/Dashboard';
 import TrafficMonitor from './pages/TrafficMonitor';
-
 import ThreatDashboard from './pages/ThreatDashboard';
 import TopologyMap from './pages/TopologyMap';
 import GeoMap from './pages/GeoMap';
 import DeviceDiscovery from './pages/DeviceDiscovery';
 import CopilotWidget from './components/CopilotWidget';
-
 function Layout({ isDark, setIsDark, isConnected }) {
   return (
-    <div className="flex h-screen bg-background overflow-hidden transition-colors duration-300">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+    <div className="relative w-screen h-screen overflow-hidden mesh-bg transition-colors duration-500">
+      
+      {/* Premium Glass Pill for Status & Controls */}
+      <div className="absolute bottom-8 left-8 z-50 flex items-center gap-4 glass-panel px-4 py-2 rounded-full shadow-2xl">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.8)]' : 'bg-danger shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`}></div>
+          <span className="text-xs font-semibold text-text-main tracking-wider uppercase">{isConnected ? 'System Online' : 'Disconnected'}</span>
+        </div>
+        
+        <div className="w-px h-4 bg-border"></div>
 
-        {/* Topbar */}
-        <header className="h-20 bg-surface/80 backdrop-blur-md border-b border-border flex items-center justify-between px-8 shrink-0 z-10">
-          <div className="flex items-center gap-4">
-            <h2 className="text-xl font-semibold text-text-main hidden md:block">Command Center</h2>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 px-4 py-1.5 bg-background rounded-full border border-border shadow-sm">
-              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-danger'}`}></div>
-              <span className="text-xs font-medium text-text-main">{isConnected ? 'System Online' : 'Disconnected'}</span>
-            </div>
-
-            <div className="flex items-center gap-3">
-
-
-              <button
-                onClick={() => setIsDark(!isDark)}
-                className="p-2 rounded-full hover:bg-white/[0.05] text-text-muted hover:text-text-main transition-colors"
-                title="Toggle Theme"
-              >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Main Scrollable Content */}
-        <main className="flex-1 overflow-auto p-8 custom-scrollbar">
-          <Outlet />
-        </main>
+        <button
+          onClick={() => setIsDark(!isDark)}
+          className="p-1.5 rounded-full hover:bg-white/[0.05] text-text-muted hover:text-text-main transition-colors"
+          title="Toggle Theme"
+        >
+          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
       </div>
+
+      {/* Main Full-Screen Workspace */}
+      <main className="absolute inset-0 overflow-y-auto overflow-x-hidden custom-scrollbar">
+        <Outlet />
+      </main>
+
+      {/* Bottom Navigation */}
+      <FloatingDock />
 
       {/* Global AI Copilot */}
       <CopilotWidget />

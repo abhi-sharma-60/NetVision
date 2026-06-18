@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Shield, Wifi, Zap, Eye, AlertTriangle, PieChart as PieChartIcon, BarChart2, Activity, Users } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -99,153 +100,63 @@ export default function Dashboard() {
     };
   }, [livePackets]);
 
+  // Animation variants
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  };
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <motion.div 
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="p-8 max-w-[1600px] mx-auto min-h-screen pb-32"
+    >
+      {/* Header Area */}
+      <motion.div variants={item} className="mb-8">
+        <h1 className="text-3xl font-light text-text-main tracking-tight">System <span className="font-semibold text-primary">Overview</span></h1>
+        <p className="text-text-muted mt-1">Real-time network telemetry and intelligence.</p>
+      </motion.div>
 
-      {/* Recruiter Metrics Banner */}
-      <div className="bg-gradient-to-r from-primary/10 via-surface to-background border border-primary/30 p-6 rounded-2xl shadow-[0_0_20px_rgba(59,130,246,0.05)] relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-        <div className="flex items-center gap-2 mb-6">
-          <Zap className="w-5 h-5 text-primary animate-pulse" />
-          <h2 className="text-lg font-bold text-text-main">System Performance KPIs</h2>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 ml-2">Enterprise Grade</span>
-        </div>
+      {/* Bento Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-6 auto-rows-[160px]">
         
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-6 divide-y md:divide-y-0 md:divide-x divide-border/50">
-          
-          <div className="pt-4 md:pt-0 md:px-4 md:first:pl-0 flex flex-col justify-center">
-            <span className="text-[10px] font-bold text-text-muted mb-1 uppercase tracking-wider">Packets Processed</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-text-main">{analytics?.total_packets?.toLocaleString() || 0}</span>
-              <span className="text-primary text-xl font-bold">+</span>
+        {/* Centerpiece Chart (Spans 8 columns, 2 rows) */}
+        <motion.div variants={item} className="col-span-1 md:col-span-4 lg:col-span-8 row-span-2 glass-panel rounded-3xl p-6 flex flex-col relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none"></div>
+          <div className="flex justify-between items-center mb-6 relative z-10">
+            <div>
+              <h2 className="text-xl font-semibold text-text-main">Live Bandwidth</h2>
+              <p className="text-xs text-text-muted">Real-time packet ingestion rate</p>
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full border border-primary/20 text-xs font-medium">
+              <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
+              Streaming
             </div>
           </div>
-
-          <div className="pt-4 md:pt-0 md:px-4 flex flex-col justify-center">
-            <span className="text-[10px] font-bold text-text-muted mb-1 uppercase tracking-wider">Threat Events</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-text-main">{(threatAlerts || []).length}</span>
-              <span className="text-orange-500 text-sm font-bold ml-1">Analyzed</span>
-            </div>
-          </div>
-
-          <div className="pt-4 md:pt-0 md:px-4 flex flex-col justify-center">
-            <span className="text-[10px] font-bold text-text-muted mb-1 uppercase tracking-wider">Devices Discovered</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-text-main">{deviceCount}</span>
-              <span className="text-green-500 text-sm font-bold ml-1">Identified</span>
-            </div>
-          </div>
-
-          <div className="pt-4 md:pt-0 md:px-4 flex flex-col justify-center">
-            <span className="text-[10px] font-bold text-text-muted mb-1 uppercase tracking-wider">Detection Time</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-green-400">&lt;200</span>
-              <span className="text-green-400 text-sm font-bold">ms</span>
-            </div>
-          </div>
-
-          <div className="pt-4 md:pt-0 md:px-4 flex flex-col justify-center">
-            <span className="text-[10px] font-bold text-text-muted mb-1 uppercase tracking-wider">Protocol Coverage</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-text-main">{Object.keys(analytics?.protocols || {}).length}</span>
-              <span className="text-text-muted text-sm font-bold ml-1">Supported</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* Top Row - 4 Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-
-        {/* 1. Network Health */}
-        <div className={`bg-surface p-6 rounded-2xl border shadow-md transition-colors duration-300 ${healthMetrics.border} relative overflow-hidden group flex items-center justify-between`}>
-          <div className={`absolute left-0 top-0 w-1 h-full ${healthMetrics.bg}`}></div>
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Activity className={`w-4 h-4 ${healthMetrics.iconColor}`} />
-              <h3 className="font-semibold text-text-main text-sm">Network Health</h3>
-            </div>
-            <div className={`text-xs font-bold ${healthMetrics.color} uppercase tracking-wide mb-2`}>
-              {healthMetrics.status}
-            </div>
-          </div>
-          <div className="relative w-16 h-16">
-            <svg className="w-full h-full transform -rotate-90">
-              <circle cx="32" cy="32" r="28" fill="transparent" stroke="var(--border-subtle)" strokeWidth="6" />
-              <circle
-                cx="32" cy="32" r="28" fill="transparent"
-                stroke="currentColor" strokeWidth="6"
-                strokeDasharray="175.9"
-                strokeDashoffset={175.9 - (175.9 * healthMetrics.score) / 100}
-                className={`transition-all duration-1000 ease-out ${healthMetrics.color}`}
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-sm font-bold text-text-main">{healthMetrics.score}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* 2. Total Packets */}
-        <div className="bg-surface p-6 rounded-2xl border border-border shadow-md transition-colors duration-300 hover:border-primary/50 flex flex-col justify-center">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-secondary/20 rounded-lg">
-              <Wifi className="text-secondary w-4 h-4" />
-            </div>
-            <h3 className="font-semibold text-text-main text-sm">Total Packets</h3>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-bold text-text-main">{analytics?.total_packets?.toLocaleString() || 0}</p>
-            <span className="text-xs text-text-muted">{analytics?.packets_per_second || 0} pps</span>
-          </div>
-        </div>
-
-        {/* 3. Total Traffic */}
-        <div className="bg-surface p-6 rounded-2xl border border-border shadow-md transition-colors duration-300 hover:border-danger/50 flex flex-col justify-center">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-danger/20 rounded-lg">
-              <Zap className="text-danger w-4 h-4" />
-            </div>
-            <h3 className="font-semibold text-text-main text-sm">Total Traffic</h3>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-bold text-text-main">{((analytics?.total_bytes || 0) / 1024).toFixed(2)}</p>
-            <span className="text-xs text-text-muted">KB</span>
-          </div>
-        </div>
-
-        {/* 4. Active Threats */}
-        <div className="bg-surface p-6 rounded-2xl border border-border shadow-md transition-colors duration-300 hover:border-orange-500/50 flex flex-col justify-center">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-orange-500/20 rounded-lg">
-              <Shield className="text-orange-500 w-4 h-4" />
-            </div>
-            <h3 className="font-semibold text-text-main text-sm">Active Threats</h3>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <p className="text-3xl font-bold text-text-main">{(threatAlerts || []).length}</p>
-            <span className="text-xs text-text-muted">Detected</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Middle Row - Main Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* Main Chart */}
-        <div className="lg:col-span-2 bg-surface p-6 rounded-2xl border border-border shadow-md min-h-[350px] relative overflow-hidden group flex flex-col">
-          <h2 className="text-lg font-semibold text-text-main mb-4">Live Network Bandwidth</h2>
-          <div className="flex-1 w-full min-h-[250px]">
+          <div className="flex-1 w-full min-h-[250px] relative z-10">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
-                <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `${val}B`} />
+                <defs>
+                  <linearGradient id="colorSize" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} opacity={0.5} />
+                <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => `${val}B`} width={40} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', borderRadius: '8px' }}
+                  contentStyle={{ backgroundColor: 'var(--bg-surface-glass)', backdropFilter: 'blur(10px)', borderColor: 'var(--border-glass)', borderRadius: '12px', color: 'var(--text-main)', boxShadow: '0 10px 25px -5px var(--shadow-color)' }}
                   itemStyle={{ color: 'var(--color-primary)' }}
                 />
                 <Line
@@ -254,18 +165,76 @@ export default function Dashboard() {
                   stroke="var(--color-primary)"
                   strokeWidth={3}
                   dot={false}
-                  activeDot={{ r: 6, fill: 'var(--color-primary)' }}
+                  activeDot={{ r: 8, fill: 'var(--color-primary)', stroke: 'rgba(59,130,246,0.3)', strokeWidth: 4 }}
                   animationDuration={300}
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Protocol Pie Chart */}
-        <div className="bg-surface p-6 rounded-2xl border border-border shadow-md min-h-[350px] flex flex-col relative overflow-hidden group">
-          <div className="flex items-center gap-2 mb-4">
-            <PieChartIcon className="w-5 h-5 text-primary" />
+        {/* Health Score (Spans 4 columns, 1 row) */}
+        <motion.div variants={item} className="col-span-1 md:col-span-2 lg:col-span-4 row-span-1 glass-panel rounded-3xl p-6 relative overflow-hidden flex items-center justify-between">
+          <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full blur-3xl opacity-20 ${healthMetrics.bg.replace('/10', '')}`}></div>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Activity className={`w-5 h-5 ${healthMetrics.iconColor}`} />
+              <h3 className="font-semibold text-text-main text-lg">System Health</h3>
+            </div>
+            <div className={`text-sm font-bold ${healthMetrics.color} uppercase tracking-wide`}>
+              {healthMetrics.status}
+            </div>
+          </div>
+          <div className="relative w-20 h-20">
+            <svg className="w-full h-full transform -rotate-90 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+              <circle cx="40" cy="40" r="36" fill="transparent" stroke="var(--border-glass)" strokeWidth="6" />
+              <circle
+                cx="40" cy="40" r="36" fill="transparent"
+                stroke="currentColor" strokeWidth="6"
+                strokeDasharray="226.2"
+                strokeDashoffset={226.2 - (226.2 * healthMetrics.score) / 100}
+                className={`transition-all duration-1000 ease-out ${healthMetrics.color}`}
+                strokeLinecap="round"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-xl font-bold text-text-main drop-shadow-md">{healthMetrics.score}</span>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Active Threats Mini (Spans 2 columns, 1 row) */}
+        <motion.div variants={item} className="col-span-1 md:col-span-1 lg:col-span-2 row-span-1 glass-panel rounded-3xl p-6 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="flex flex-col h-full justify-between relative z-10">
+            <div className="w-10 h-10 rounded-2xl bg-orange-500/20 flex items-center justify-center border border-orange-500/30">
+              <Shield className="text-orange-500 w-5 h-5 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-text-main">{(threatAlerts || []).length}</p>
+              <h3 className="font-medium text-text-muted text-sm">Active Threats</h3>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Total Devices Mini (Spans 2 columns, 1 row) */}
+        <motion.div variants={item} className="col-span-1 md:col-span-1 lg:col-span-2 row-span-1 glass-panel rounded-3xl p-6 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="flex flex-col h-full justify-between relative z-10">
+            <div className="w-10 h-10 rounded-2xl bg-secondary/20 flex items-center justify-center border border-secondary/30">
+              <Users className="text-secondary w-5 h-5 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-text-main">{deviceCount}</p>
+              <h3 className="font-medium text-text-muted text-sm">Devices</h3>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Protocol Distribution (Spans 4 columns, 2 rows) */}
+        <motion.div variants={item} className="col-span-1 md:col-span-4 lg:col-span-4 row-span-2 glass-panel rounded-3xl p-6 flex flex-col relative">
+          <div className="flex items-center gap-2 mb-2">
+            <PieChartIcon className="w-5 h-5 text-purple-500 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
             <h3 className="font-semibold text-text-main">Protocol Distribution</h3>
           </div>
           <div className="flex-1 w-full relative">
@@ -277,152 +246,94 @@ export default function Dashboard() {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={5}
+                  innerRadius={70}
+                  outerRadius={100}
+                  paddingAngle={8}
+                  cornerRadius={4}
                 >
                   {protocolData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={PROTOCOL_COLORS[entry.name] || '#6b7280'} stroke="transparent" />
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', borderRadius: '8px', color: 'var(--text-main)' }}
+                  contentStyle={{ backgroundColor: 'var(--bg-surface-glass)', backdropFilter: 'blur(10px)', borderColor: 'var(--border-glass)', borderRadius: '12px', color: 'var(--text-main)', boxShadow: '0 10px 25px -5px var(--shadow-color)' }}
                   itemStyle={{ color: 'var(--text-main)' }}
                 />
               </PieChart>
             </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Row - Additional Widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* Protocol Frequency Bar Chart */}
-        <div className="bg-surface p-6 rounded-2xl border border-border shadow-md flex flex-col h-[300px] overflow-hidden">
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart2 className="w-5 h-5 text-secondary" />
-            <h3 className="font-semibold text-text-main">Protocol Frequency</h3>
-          </div>
-          <div className="flex-1 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={protocolData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
-                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
-                <YAxis stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
-                <Tooltip
-                  cursor={{ fill: 'var(--border-subtle)', opacity: 0.4 }}
-                  contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', borderRadius: '8px', color: 'var(--text-main)' }}
-                />
-                <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={40}>
-                  {protocolData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={PROTOCOL_COLORS[entry.name] || '#6b7280'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Top Talkers Widget */}
-        <div className="bg-surface p-6 rounded-2xl border border-border shadow-md flex flex-col h-[300px] overflow-hidden">
-          <div className="flex items-center gap-2 mb-4">
-            <Users className="w-5 h-5 text-purple-500" />
-            <h3 className="font-semibold text-text-main">Top Talkers</h3>
-          </div>
-          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
-
-            {/* Source IPs */}
-            <div>
-              <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Top Sources</h4>
-              <div className="space-y-2">
-                {topTalkers.src.map((item, i) => (
-                  <div key={`src-${i}`} className="flex justify-between items-center text-sm">
-                    <span className="font-mono text-text-main">{item.key}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 h-1.5 bg-background rounded-full overflow-hidden">
-                        <div className="h-full bg-purple-500 rounded-full" style={{ width: `${item.percentage}%` }}></div>
-                      </div>
-                      <span className="text-text-muted w-8 text-right text-xs">{item.percentage}%</span>
-                    </div>
-                  </div>
-                ))}
-                {topTalkers.src.length === 0 && <span className="text-xs text-text-muted">No data</span>}
-              </div>
+            {/* Center label */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-2xl font-bold text-text-main">{protocolData.length}</span>
+              <span className="text-xs text-text-muted">Protocols</span>
             </div>
-
-            {/* Destination IPs */}
-            <div>
-              <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Top Destinations</h4>
-              <div className="space-y-2">
-                {topTalkers.dst.map((item, i) => (
-                  <div key={`dst-${i}`} className="flex justify-between items-center text-sm">
-                    <span className="font-mono text-text-main truncate max-w-[120px]">{item.key}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 h-1.5 bg-background rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 rounded-full" style={{ width: `${item.percentage}%` }}></div>
-                      </div>
-                      <span className="text-text-muted w-8 text-right text-xs">{item.percentage}%</span>
-                    </div>
-                  </div>
-                ))}
-                {topTalkers.dst.length === 0 && <span className="text-xs text-text-muted">No data</span>}
-              </div>
-            </div>
-
-            {/* Ports */}
-            <div>
-              <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Top Ports</h4>
-              <div className="space-y-2">
-                {topTalkers.ports.map((item, i) => (
-                  <div key={`port-${i}`} className="flex justify-between items-center text-sm">
-                    <span className="font-mono text-text-main">Port {item.key}</span>
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 h-1.5 bg-background rounded-full overflow-hidden">
-                        <div className="h-full bg-green-500 rounded-full" style={{ width: `${item.percentage}%` }}></div>
-                      </div>
-                      <span className="text-text-muted w-8 text-right text-xs">{item.percentage}%</span>
-                    </div>
-                  </div>
-                ))}
-                {topTalkers.ports.length === 0 && <span className="text-xs text-text-muted">No data</span>}
-              </div>
-            </div>
-
           </div>
-        </div>
+        </motion.div>
 
-        {/* Deep Packet Inspector Mini */}
-        <div className="bg-surface p-6 rounded-2xl border border-border shadow-md flex flex-col h-[300px] overflow-hidden">
+        {/* Live Packet Inspector Mini (Spans 4 columns, 2 rows) */}
+        <motion.div variants={item} className="col-span-1 md:col-span-4 lg:col-span-4 row-span-2 glass-panel rounded-3xl p-6 flex flex-col relative overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold text-text-main">Live Packets</h3>
-            </div>
-            <div className="flex items-center gap-2 text-[10px] font-medium px-2 py-1 bg-green-500/10 text-green-500 rounded-full border border-green-500/20">
-              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-              LIVE
+              <Eye className="w-5 h-5 text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+              <h3 className="font-semibold text-text-main">Packet Stream</h3>
             </div>
           </div>
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            <div className="space-y-2">
-              {livePackets.length === 0 && <p className="text-sm text-text-muted">Waiting for packets...</p>}
-              {livePackets.slice(-30).reverse().map((pkt, idx) => (
-                <div key={idx} className="text-xs flex justify-between items-center p-2.5 rounded-lg bg-background border border-border/50 hover:border-primary/30 transition-colors">
+            <div className="space-y-3">
+              {livePackets.length === 0 && <p className="text-sm text-text-muted text-center mt-10">Intercepting packets...</p>}
+              {livePackets.slice(-15).reverse().map((pkt, idx) => (
+                <motion.div 
+                  key={idx} 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="text-xs flex justify-between items-center p-3 rounded-xl bg-surface/50 border border-border hover:bg-primary/5 transition-colors backdrop-blur-sm"
+                >
                   <span className="font-mono font-bold w-12" style={{ color: PROTOCOL_COLORS[pkt.protocol] || '#9ca3af' }}>
                     {pkt.protocol}
                   </span>
-                  <span className="text-text-muted font-mono truncate max-w-[120px]">{pkt.src_ip}</span>
-                  <span className="text-text-muted">→</span>
-                  <span className="text-text-muted font-mono truncate max-w-[120px]">{pkt.dst_ip}</span>
-                  <span className="text-text-main font-medium w-12 text-right">{pkt.size}B</span>
-                </div>
+                  <div className="flex flex-col gap-1 w-[140px]">
+                    <span className="text-text-main font-mono truncate">{pkt.src_ip}</span>
+                    <span className="text-text-muted font-mono truncate">{pkt.dst_ip}</span>
+                  </div>
+                  <span className="text-primary font-medium w-14 text-right bg-primary/10 py-1 px-2 rounded-md">{pkt.size}B</span>
+                </motion.div>
               ))}
             </div>
           </div>
-        </div>
+          {/* Fading edge at bottom */}
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[var(--bg-surface-glass)] to-transparent pointer-events-none rounded-b-3xl"></div>
+        </motion.div>
+
+        {/* KPI: Processed Packets (Spans 4 columns, 1 row) */}
+        <motion.div variants={item} className="col-span-1 md:col-span-4 lg:col-span-4 row-span-1 glass-panel rounded-3xl p-6 flex justify-between items-center group overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="relative z-10">
+            <h3 className="text-sm font-medium text-text-muted mb-1">Total Packets Analyzed</h3>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-bold text-text-main tracking-tight">{analytics?.total_packets?.toLocaleString() || 0}</span>
+              <span className="text-primary font-bold">pps: {analytics?.packets_per_second || 0}</span>
+            </div>
+          </div>
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 relative z-10">
+             <Wifi className="w-8 h-8 text-primary drop-shadow-[0_0_10px_rgba(59,130,246,0.6)]" />
+          </div>
+        </motion.div>
+
+        {/* KPI: Total Traffic (Spans 4 columns, 1 row) */}
+        <motion.div variants={item} className="col-span-1 md:col-span-4 lg:col-span-4 row-span-1 glass-panel rounded-3xl p-6 flex justify-between items-center group overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-danger/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="relative z-10">
+            <h3 className="text-sm font-medium text-text-muted mb-1">Total Traffic Volume</h3>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-bold text-text-main tracking-tight">{((analytics?.total_bytes || 0) / 1024).toFixed(2)}</span>
+              <span className="text-danger font-bold">KB</span>
+            </div>
+          </div>
+          <div className="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center border border-danger/20 relative z-10">
+             <Zap className="w-8 h-8 text-danger drop-shadow-[0_0_10px_rgba(239,68,68,0.6)]" />
+          </div>
+        </motion.div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }
