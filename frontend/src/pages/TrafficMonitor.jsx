@@ -1,10 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Activity, ShieldAlert, ArrowRightLeft, Clock, Database, Globe } from 'lucide-react';
+import { Activity, ShieldAlert, ArrowRightLeft, Clock, Database, Globe, Search, Filter } from 'lucide-react';
 
 export default function TrafficMonitor() {
   const { livePackets, threatAlerts } = useOutletContext();
   const suspiciousIps = new Set(threatAlerts?.map(alert => alert.src_ip) || []);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [protocolFilter, setProtocolFilter] = useState('All');
+  const [statusFilter, setStatusFilter] = useState('All');
+
+  const filteredPackets = livePackets.filter(pkt => {
+    if (searchTerm && !pkt.src_ip.toLowerCase().includes(searchTerm.toLowerCase()) && !pkt.dst_ip.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (protocolFilter !== 'All' && pkt.protocol !== protocolFilter) return false;
+    
+    const isSuspicious = suspiciousIps.has(pkt.src_ip);
+    if (statusFilter === 'Suspicious' && !isSuspicious) return false;
+    if (statusFilter === 'Safe' && isSuspicious) return false;
+    
+    return true;
+  });
 
   const getProtocolColor = (protocol) => {
     switch(protocol) {
@@ -29,18 +44,60 @@ export default function TrafficMonitor() {
       {/* Main Table Container */}
       <div className="bg-surface border border-border shadow-lg rounded-2xl overflow-hidden flex flex-col h-[calc(100vh-220px)]">
         
-        {/* Table Header Area */}
-        <div className="p-4 border-b border-border bg-surface/50 flex justify-between items-center">
+        {/* Table Header Area & Filters */}
+        <div className="p-4 border-b border-border bg-surface/50 flex flex-col md:flex-row justify-between gap-4 items-center">
           <div className="flex items-center gap-3 text-sm font-medium text-text-main">
             <Activity className="w-5 h-5 text-primary" />
             <span>Intercepted Packets stream</span>
+            <div className="flex items-center gap-2 text-xs ml-4">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span className="text-text-muted">Capturing Live</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-xs">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span className="text-text-muted">Capturing Live</span>
+          
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            {/* Search */}
+            <div className="relative flex-1 md:w-64">
+              <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
+              <input 
+                type="text" 
+                placeholder="Search IPs..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-background border border-border focus:border-primary/50 text-sm text-text-main rounded-lg pl-9 pr-4 py-2 outline-none transition-colors"
+              />
+            </div>
+            
+            {/* Filters */}
+            <div className="flex items-center gap-2 border border-border bg-background rounded-lg p-1">
+              <Filter className="w-4 h-4 text-text-muted ml-2" />
+              <select 
+                value={protocolFilter}
+                onChange={(e) => setProtocolFilter(e.target.value)}
+                className="bg-transparent text-sm text-text-main py-1 px-2 outline-none cursor-pointer"
+              >
+                <option value="All">All Protocols</option>
+                <option value="TCP">TCP</option>
+                <option value="UDP">UDP</option>
+                <option value="DNS">DNS</option>
+                <option value="HTTPS">HTTPS</option>
+                <option value="HTTP">HTTP</option>
+                <option value="ICMP">ICMP</option>
+              </select>
+              <div className="w-px h-4 bg-border"></div>
+              <select 
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="bg-transparent text-sm text-text-main py-1 px-2 outline-none cursor-pointer"
+              >
+                <option value="All">All Status</option>
+                <option value="Safe">Safe</option>
+                <option value="Suspicious">Suspicious</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -58,14 +115,14 @@ export default function TrafficMonitor() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50 text-sm">
-              {livePackets.length === 0 ? (
+              {filteredPackets.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="px-6 py-12 text-center text-text-muted">
-                    Waiting for network packets to arrive...
+                    No packets match the current filters.
                   </td>
                 </tr>
               ) : (
-                livePackets.map((pkt, idx) => (
+                filteredPackets.map((pkt, idx) => (
                   <tr 
                     key={idx} 
                     className="group hover:bg-white/[0.02] dark:hover:bg-white/[0.02] transition-colors"
@@ -105,9 +162,8 @@ export default function TrafficMonitor() {
           </table>
         </div>
         
-        {/* Footer */}
         <div className="p-3 border-t border-border bg-surface/50 text-xs text-text-muted text-right">
-          Displaying last 50 packets
+          Displaying {filteredPackets.length} recent packets
         </div>
 
       </div>
