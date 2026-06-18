@@ -13,6 +13,16 @@ class ThreatDetector:
         self.brute_force_threshold = 50
         self.brute_force_window = 10.0 # seconds
 
+        # DNS Flood (src_ip -> timestamps)
+        self.dns_history = defaultdict(list)
+        self.dns_threshold = 40
+        self.dns_window = 5.0
+
+        # ICMP Flood (src_ip -> timestamps)
+        self.icmp_history = defaultdict(list)
+        self.icmp_threshold = 50
+        self.icmp_window = 5.0
+
     def process_packet(self, packet):
         alerts = []
         src_ip = packet.get("src_ip")
@@ -66,6 +76,42 @@ class ThreatDetector:
                 "message": f"Detected {len(recent_bf_conns)} rapid connections to {dst_ip}:{dst_port} in {self.brute_force_window}s"
             })
             self.brute_force_history[target_key] = []
+
+        # ---------------------------
+        # 3. DNS Flood Detection
+        # ---------------------------
+        if packet.get("protocol") == "DNS" or dst_port == 53:
+            self.dns_history[src_ip].append(timestamp)
+            recent_dns = [ts for ts in self.dns_history[src_ip] if timestamp - ts <= self.dns_window]
+            self.dns_history[src_ip] = recent_dns
+            
+            if len(recent_dns) >= self.dns_threshold:
+                alerts.append({
+                    "type": "DNS Flood",
+                    "severity": "High",
+                    "src_ip": src_ip,
+                    "timestamp": timestamp,
+                    "message": f"Detected {len(recent_dns)} DNS queries in {self.dns_window}s"
+                })
+                self.dns_history[src_ip] = []
+
+        # ---------------------------
+        # 4. ICMP Flood Detection
+        # ---------------------------
+        if packet.get("protocol") == "ICMP":
+            self.icmp_history[src_ip].append(timestamp)
+            recent_icmp = [ts for ts in self.icmp_history[src_ip] if timestamp - ts <= self.icmp_window]
+            self.icmp_history[src_ip] = recent_icmp
+            
+            if len(recent_icmp) >= self.icmp_threshold:
+                alerts.append({
+                    "type": "ICMP Ping Flood",
+                    "severity": "High",
+                    "src_ip": src_ip,
+                    "timestamp": timestamp,
+                    "message": f"Detected {len(recent_icmp)} ICMP packets in {self.icmp_window}s"
+                })
+                self.icmp_history[src_ip] = []
 
         return alerts
 

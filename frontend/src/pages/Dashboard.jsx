@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Shield, Wifi, Zap, Eye, AlertTriangle, PieChart as PieChartIcon, BarChart2, Activity, Users } from 'lucide-react';
-import { 
+import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar
 } from 'recharts';
@@ -20,7 +20,7 @@ export default function Dashboard() {
 
   const healthMetrics = useMemo(() => {
     let score = 100;
-    
+
     // Threat & Anomaly Penalties based on active ML alerts
     const threatPenalty = (threatAlerts || []).reduce((acc, curr) => {
       if (curr.severity === 'High') return acc + 5;
@@ -31,7 +31,7 @@ export default function Dashboard() {
     // Simulated packet loss or congestion penalty based on volume
     const packetRate = analytics?.packets_per_second || 0;
     const packetLossPenalty = packetRate > 1000 ? 5 : (packetRate > 500 ? 2 : 0);
-    
+
     score = Math.max(0, 100 - threatPenalty - packetLossPenalty);
 
     let status = "Healthy";
@@ -93,10 +93,10 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      
+
       {/* Top Row - 4 Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        
+
         {/* 1. Network Health */}
         <div className={`bg-surface p-6 rounded-2xl border shadow-md transition-colors duration-300 ${healthMetrics.border} relative overflow-hidden group flex items-center justify-between`}>
           <div className={`absolute left-0 top-0 w-1 h-full ${healthMetrics.bg}`}></div>
@@ -112,11 +112,11 @@ export default function Dashboard() {
           <div className="relative w-16 h-16">
             <svg className="w-full h-full transform -rotate-90">
               <circle cx="32" cy="32" r="28" fill="transparent" stroke="var(--border-subtle)" strokeWidth="6" />
-              <circle 
-                cx="32" cy="32" r="28" fill="transparent" 
-                stroke="currentColor" strokeWidth="6" 
-                strokeDasharray="175.9" 
-                strokeDashoffset={175.9 - (175.9 * healthMetrics.score) / 100} 
+              <circle
+                cx="32" cy="32" r="28" fill="transparent"
+                stroke="currentColor" strokeWidth="6"
+                strokeDasharray="175.9"
+                strokeDashoffset={175.9 - (175.9 * healthMetrics.score) / 100}
                 className={`transition-all duration-1000 ease-out ${healthMetrics.color}`}
                 strokeLinecap="round"
               />
@@ -172,7 +172,7 @@ export default function Dashboard() {
 
       {/* Middle Row - Main Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Main Chart */}
         <div className="lg:col-span-2 bg-surface p-6 rounded-2xl border border-border shadow-md min-h-[350px] relative overflow-hidden group flex flex-col">
           <h2 className="text-lg font-semibold text-text-main mb-4">Live Network Bandwidth</h2>
@@ -182,17 +182,17 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
                 <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `${val}B`} />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', borderRadius: '8px' }}
                   itemStyle={{ color: 'var(--color-primary)' }}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="size" 
-                  stroke="var(--color-primary)" 
+                <Line
+                  type="monotone"
+                  dataKey="size"
+                  stroke="var(--color-primary)"
                   strokeWidth={3}
                   dot={false}
-                  activeDot={{ r: 6, fill: 'var(--color-primary)' }} 
+                  activeDot={{ r: 6, fill: 'var(--color-primary)' }}
                   animationDuration={300}
                 />
               </LineChart>
@@ -223,7 +223,7 @@ export default function Dashboard() {
                     <Cell key={`cell-${index}`} fill={PROTOCOL_COLORS[entry.name] || '#6b7280'} stroke="transparent" />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', borderRadius: '8px', color: 'var(--text-main)' }}
                   itemStyle={{ color: 'var(--text-main)' }}
                 />
@@ -235,129 +235,129 @@ export default function Dashboard() {
 
       {/* Bottom Row - Additional Widgets */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Protocol Frequency Bar Chart */}
         <div className="bg-surface p-6 rounded-2xl border border-border shadow-md flex flex-col h-[300px] overflow-hidden">
-           <div className="flex items-center gap-2 mb-4">
-             <BarChart2 className="w-5 h-5 text-secondary" />
-             <h3 className="font-semibold text-text-main">Protocol Frequency</h3>
-           </div>
-           <div className="flex-1 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={protocolData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
-                  <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
-                  <Tooltip 
-                    cursor={{ fill: 'var(--border-subtle)', opacity: 0.4 }}
-                    contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', borderRadius: '8px', color: 'var(--text-main)' }} 
-                  />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={40}>
-                    {protocolData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={PROTOCOL_COLORS[entry.name] || '#6b7280'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-           </div>
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart2 className="w-5 h-5 text-secondary" />
+            <h3 className="font-semibold text-text-main">Protocol Frequency</h3>
+          </div>
+          <div className="flex-1 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={protocolData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
+                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
+                <Tooltip
+                  cursor={{ fill: 'var(--border-subtle)', opacity: 0.4 }}
+                  contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', borderRadius: '8px', color: 'var(--text-main)' }}
+                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={40}>
+                  {protocolData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={PROTOCOL_COLORS[entry.name] || '#6b7280'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Top Talkers Widget */}
         <div className="bg-surface p-6 rounded-2xl border border-border shadow-md flex flex-col h-[300px] overflow-hidden">
-           <div className="flex items-center gap-2 mb-4">
-             <Users className="w-5 h-5 text-purple-500" />
-             <h3 className="font-semibold text-text-main">Top Talkers</h3>
-           </div>
-           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
-             
-             {/* Source IPs */}
-             <div>
-               <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Top Sources</h4>
-               <div className="space-y-2">
-                 {topTalkers.src.map((item, i) => (
-                   <div key={`src-${i}`} className="flex justify-between items-center text-sm">
-                     <span className="font-mono text-text-main">{item.key}</span>
-                     <div className="flex items-center gap-2">
-                       <div className="w-20 h-1.5 bg-background rounded-full overflow-hidden">
-                         <div className="h-full bg-purple-500 rounded-full" style={{ width: `${item.percentage}%` }}></div>
-                       </div>
-                       <span className="text-text-muted w-8 text-right text-xs">{item.percentage}%</span>
-                     </div>
-                   </div>
-                 ))}
-                 {topTalkers.src.length === 0 && <span className="text-xs text-text-muted">No data</span>}
-               </div>
-             </div>
+          <div className="flex items-center gap-2 mb-4">
+            <Users className="w-5 h-5 text-purple-500" />
+            <h3 className="font-semibold text-text-main">Top Talkers</h3>
+          </div>
+          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4">
 
-             {/* Destination IPs */}
-             <div>
-               <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Top Destinations</h4>
-               <div className="space-y-2">
-                 {topTalkers.dst.map((item, i) => (
-                   <div key={`dst-${i}`} className="flex justify-between items-center text-sm">
-                     <span className="font-mono text-text-main truncate max-w-[120px]">{item.key}</span>
-                     <div className="flex items-center gap-2">
-                       <div className="w-20 h-1.5 bg-background rounded-full overflow-hidden">
-                         <div className="h-full bg-blue-500 rounded-full" style={{ width: `${item.percentage}%` }}></div>
-                       </div>
-                       <span className="text-text-muted w-8 text-right text-xs">{item.percentage}%</span>
-                     </div>
-                   </div>
-                 ))}
-                 {topTalkers.dst.length === 0 && <span className="text-xs text-text-muted">No data</span>}
-               </div>
-             </div>
+            {/* Source IPs */}
+            <div>
+              <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Top Sources</h4>
+              <div className="space-y-2">
+                {topTalkers.src.map((item, i) => (
+                  <div key={`src-${i}`} className="flex justify-between items-center text-sm">
+                    <span className="font-mono text-text-main">{item.key}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 h-1.5 bg-background rounded-full overflow-hidden">
+                        <div className="h-full bg-purple-500 rounded-full" style={{ width: `${item.percentage}%` }}></div>
+                      </div>
+                      <span className="text-text-muted w-8 text-right text-xs">{item.percentage}%</span>
+                    </div>
+                  </div>
+                ))}
+                {topTalkers.src.length === 0 && <span className="text-xs text-text-muted">No data</span>}
+              </div>
+            </div>
 
-             {/* Ports */}
-             <div>
-               <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Top Ports</h4>
-               <div className="space-y-2">
-                 {topTalkers.ports.map((item, i) => (
-                   <div key={`port-${i}`} className="flex justify-between items-center text-sm">
-                     <span className="font-mono text-text-main">Port {item.key}</span>
-                     <div className="flex items-center gap-2">
-                       <div className="w-20 h-1.5 bg-background rounded-full overflow-hidden">
-                         <div className="h-full bg-green-500 rounded-full" style={{ width: `${item.percentage}%` }}></div>
-                       </div>
-                       <span className="text-text-muted w-8 text-right text-xs">{item.percentage}%</span>
-                     </div>
-                   </div>
-                 ))}
-                 {topTalkers.ports.length === 0 && <span className="text-xs text-text-muted">No data</span>}
-               </div>
-             </div>
+            {/* Destination IPs */}
+            <div>
+              <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Top Destinations</h4>
+              <div className="space-y-2">
+                {topTalkers.dst.map((item, i) => (
+                  <div key={`dst-${i}`} className="flex justify-between items-center text-sm">
+                    <span className="font-mono text-text-main truncate max-w-[120px]">{item.key}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 h-1.5 bg-background rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-500 rounded-full" style={{ width: `${item.percentage}%` }}></div>
+                      </div>
+                      <span className="text-text-muted w-8 text-right text-xs">{item.percentage}%</span>
+                    </div>
+                  </div>
+                ))}
+                {topTalkers.dst.length === 0 && <span className="text-xs text-text-muted">No data</span>}
+              </div>
+            </div>
 
-           </div>
+            {/* Ports */}
+            <div>
+              <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Top Ports</h4>
+              <div className="space-y-2">
+                {topTalkers.ports.map((item, i) => (
+                  <div key={`port-${i}`} className="flex justify-between items-center text-sm">
+                    <span className="font-mono text-text-main">Port {item.key}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 h-1.5 bg-background rounded-full overflow-hidden">
+                        <div className="h-full bg-green-500 rounded-full" style={{ width: `${item.percentage}%` }}></div>
+                      </div>
+                      <span className="text-text-muted w-8 text-right text-xs">{item.percentage}%</span>
+                    </div>
+                  </div>
+                ))}
+                {topTalkers.ports.length === 0 && <span className="text-xs text-text-muted">No data</span>}
+              </div>
+            </div>
+
+          </div>
         </div>
 
         {/* Deep Packet Inspector Mini */}
         <div className="bg-surface p-6 rounded-2xl border border-border shadow-md flex flex-col h-[300px] overflow-hidden">
-           <div className="flex items-center justify-between mb-4">
-             <div className="flex items-center gap-2">
-               <Eye className="w-5 h-5 text-primary" />
-               <h3 className="font-semibold text-text-main">Live Packets</h3>
-             </div>
-             <div className="flex items-center gap-2 text-[10px] font-medium px-2 py-1 bg-green-500/10 text-green-500 rounded-full border border-green-500/20">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                LIVE
-             </div>
-           </div>
-           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-             <div className="space-y-2">
-               {livePackets.length === 0 && <p className="text-sm text-text-muted">Waiting for packets...</p>}
-               {livePackets.slice(-30).reverse().map((pkt, idx) => (
-                 <div key={idx} className="text-xs flex justify-between items-center p-2.5 rounded-lg bg-background border border-border/50 hover:border-primary/30 transition-colors">
-                   <span className="font-mono font-bold w-12" style={{ color: PROTOCOL_COLORS[pkt.protocol] || '#9ca3af' }}>
-                     {pkt.protocol}
-                   </span>
-                   <span className="text-text-muted font-mono truncate max-w-[120px]">{pkt.src_ip}</span>
-                   <span className="text-text-muted">→</span>
-                   <span className="text-text-muted font-mono truncate max-w-[120px]">{pkt.dst_ip}</span>
-                   <span className="text-text-main font-medium w-12 text-right">{pkt.size}B</span>
-                 </div>
-               ))}
-             </div>
-           </div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold text-text-main">Live Packets</h3>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] font-medium px-2 py-1 bg-green-500/10 text-green-500 rounded-full border border-green-500/20">
+              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+              LIVE
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-2">
+              {livePackets.length === 0 && <p className="text-sm text-text-muted">Waiting for packets...</p>}
+              {livePackets.slice(-30).reverse().map((pkt, idx) => (
+                <div key={idx} className="text-xs flex justify-between items-center p-2.5 rounded-lg bg-background border border-border/50 hover:border-primary/30 transition-colors">
+                  <span className="font-mono font-bold w-12" style={{ color: PROTOCOL_COLORS[pkt.protocol] || '#9ca3af' }}>
+                    {pkt.protocol}
+                  </span>
+                  <span className="text-text-muted font-mono truncate max-w-[120px]">{pkt.src_ip}</span>
+                  <span className="text-text-muted">→</span>
+                  <span className="text-text-muted font-mono truncate max-w-[120px]">{pkt.dst_ip}</span>
+                  <span className="text-text-main font-medium w-12 text-right">{pkt.size}B</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
       </div>

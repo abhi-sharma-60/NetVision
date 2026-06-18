@@ -2,9 +2,9 @@ import React, { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { ShieldAlert, AlertTriangle, ShieldX, CheckCircle, Globe, Activity, XCircle, Download } from 'lucide-react';
 import { generateSecurityReport } from '../utils/reportGenerator';
-import { 
+import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-  PieChart, Pie, Cell 
+  PieChart, Pie, Cell
 } from 'recharts';
 
 const SEVERITY_COLORS = {
@@ -15,7 +15,7 @@ const SEVERITY_COLORS = {
 
 export default function ThreatDashboard() {
   const { threatAlerts, livePackets, analytics } = useOutletContext();
-  
+
   const [actionedAlerts, setActionedAlerts] = useState({});
 
   const handleAction = (idx, action) => {
@@ -27,7 +27,7 @@ export default function ThreatDashboard() {
       .map((alert, idx) => ({ ...alert, originalIdx: idx }))
       .filter(a => actionedAlerts[a.originalIdx] !== 'dismissed');
   }, [threatAlerts, actionedAlerts]);
-  
+
   // 1. Severity Data
   const severityData = useMemo(() => {
     const counts = { High: 0, Medium: 0, Low: 0 };
@@ -45,7 +45,7 @@ export default function ThreatDashboard() {
   const timelineData = useMemo(() => {
     const buckets = {};
     const sorted = [...activeAlerts].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-    
+
     sorted.forEach(a => {
       const ts = a.timestamp ? a.timestamp * 1000 : Date.now();
       const timeStr = new Date(ts).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
@@ -75,14 +75,14 @@ export default function ThreatDashboard() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-text-main mb-2">Security Center</h2>
           <p className="text-text-muted">Real-time threat timeline, severity distribution, and suspicious host tracking.</p>
         </div>
-        <button 
+        <button
           onClick={() => generateSecurityReport(threatAlerts, livePackets, analytics)}
           className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white border border-primary/20 rounded-xl transition-all font-medium text-sm shadow-[0_0_15px_rgba(59,130,246,0.2)]"
         >
@@ -92,7 +92,7 @@ export default function ThreatDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Severity Chart */}
         <div className="bg-surface p-6 rounded-2xl border border-border shadow-md flex flex-col h-[300px]">
           <div className="flex items-center gap-2 mb-4">
@@ -119,7 +119,7 @@ export default function ThreatDashboard() {
                       <Cell key={`cell-${index}`} fill={SEVERITY_COLORS[entry.name] || '#6b7280'} stroke="transparent" />
                     ))}
                   </Pie>
-                  <RechartsTooltip 
+                  <RechartsTooltip
                     contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-subtle)', borderRadius: '8px', color: 'var(--text-main)' }}
                   />
                 </PieChart>
@@ -145,15 +145,15 @@ export default function ThreatDashboard() {
             ) : (
               <div className="relative border-l-2 border-border/50 ml-3 space-y-6">
                 {activeAlerts.slice().reverse().map((alert, idx) => {
-                  const timeStr = alert.timestamp ? new Date(alert.timestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}) : new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                  const timeStr = alert.timestamp ? new Date(alert.timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                   const color = alert.severity === 'High' ? 'bg-red-500' : (alert.severity === 'Medium' ? 'bg-orange-500' : 'bg-yellow-500');
                   const glow = alert.severity === 'High' ? 'shadow-[0_0_8px_rgba(239,68,68,0.5)]' : '';
-                  
+
                   return (
                     <div key={idx} className="relative pl-6 group">
                       {/* Timeline Dot */}
                       <div className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-4 border-surface ${color} ${glow} transition-transform group-hover:scale-125`}></div>
-                      
+
                       {/* Content */}
                       <div className="flex flex-col bg-background/50 p-3 rounded-xl border border-border/50 transition-colors group-hover:border-primary/30">
                         <div className="flex items-baseline gap-3 mb-1">
@@ -178,8 +178,43 @@ export default function ThreatDashboard() {
         </div>
       </div>
 
+      {/* Live Attack Simulation Card */}
+      <div className="bg-surface rounded-2xl border border-border shadow-md p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Globe className="w-5 h-5 text-blue-500" />
+          <h3 className="font-semibold text-text-main">Live Attack Simulation Mode</h3>
+          <span className="px-2 py-0.5 ml-2 bg-blue-500/10 text-blue-500 text-[10px] font-bold rounded uppercase tracking-widest border border-blue-500/20">Demo</span>
+        </div>
+        <p className="text-sm text-text-muted mb-4">Inject synthetic attack vectors directly into the deep packet inspection pipeline. Watch the Threat Timeline, Topology Map, and AI Engine react in real-time.</p>
+        <div className="flex flex-wrap gap-4">
+          <button
+            onClick={() => fetch('http://localhost:8000/api/simulate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ attack_type: 'DNS Flood' }) })}
+            className="flex-1 min-w-[200px] px-4 py-3 bg-background border border-border hover:border-red-500/50 hover:bg-red-500/5 rounded-xl transition-all text-text-main font-medium text-sm flex items-center justify-between group"
+          >
+            <span>Generate DNS Flood</span>
+            <ShieldX className="w-4 h-4 text-red-500 opacity-50 group-hover:opacity-100 transition-opacity" />
+          </button>
+
+          <button
+            onClick={() => fetch('http://localhost:8000/api/simulate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ attack_type: 'Port Scan' }) })}
+            className="flex-1 min-w-[200px] px-4 py-3 bg-background border border-border hover:border-orange-500/50 hover:bg-orange-500/5 rounded-xl transition-all text-text-main font-medium text-sm flex items-center justify-between group"
+          >
+            <span>Generate Port Scan</span>
+            <AlertTriangle className="w-4 h-4 text-orange-500 opacity-50 group-hover:opacity-100 transition-opacity" />
+          </button>
+
+          <button
+            onClick={() => fetch('http://localhost:8000/api/simulate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ attack_type: 'ICMP Flood' }) })}
+            className="flex-1 min-w-[200px] px-4 py-3 bg-background border border-border hover:border-yellow-500/50 hover:bg-yellow-500/5 rounded-xl transition-all text-text-main font-medium text-sm flex items-center justify-between group"
+          >
+            <span>Generate ICMP Flood</span>
+            <ShieldAlert className="w-4 h-4 text-yellow-500 opacity-50 group-hover:opacity-100 transition-opacity" />
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[400px]">
-        
+
         {/* Suspicious Hosts Table */}
         <div className="bg-surface rounded-2xl border border-border shadow-md flex flex-col overflow-hidden">
           <div className="p-4 border-b border-border bg-surface/50 flex items-center gap-2">
@@ -249,21 +284,19 @@ export default function ThreatDashboard() {
                 ) : (
                   activeAlerts.map((alert) => {
                     const isBlocked = actionedAlerts[alert.originalIdx] === 'blocked';
-                    
+
                     return (
-                      <tr 
-                        key={alert.originalIdx} 
-                        className={`group hover:bg-white/[0.02] dark:hover:bg-white/[0.02] transition-colors ${
-                          isBlocked ? 'opacity-50 bg-red-500/5' : ''
-                        }`}
+                      <tr
+                        key={alert.originalIdx}
+                        className={`group hover:bg-white/[0.02] dark:hover:bg-white/[0.02] transition-colors ${isBlocked ? 'opacity-50 bg-red-500/5' : ''
+                          }`}
                       >
                         <td className="px-4 py-3 text-xs text-text-muted whitespace-nowrap">
                           {alert.timestamp ? new Date(alert.timestamp * 1000).toLocaleTimeString() : new Date().toLocaleTimeString()}
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                            alert.severity === 'High' ? 'bg-red-500/20 text-red-500' : 'bg-orange-500/20 text-orange-500'
-                          }`}>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${alert.severity === 'High' ? 'bg-red-500/20 text-red-500' : 'bg-orange-500/20 text-orange-500'
+                            }`}>
                             {alert.severity}
                           </span>
                         </td>
@@ -291,13 +324,13 @@ export default function ThreatDashboard() {
                         <td className="px-4 py-3 text-right">
                           {!isBlocked ? (
                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button 
+                              <button
                                 onClick={() => handleAction(alert.originalIdx, 'dismissed')}
                                 className="px-2 py-1 rounded text-xs font-medium text-text-muted hover:text-text-main hover:bg-white/[0.05] transition-colors"
                               >
                                 Dismiss
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleAction(alert.originalIdx, 'blocked')}
                                 className="px-2 py-1 rounded text-xs font-medium bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 transition-colors"
                               >

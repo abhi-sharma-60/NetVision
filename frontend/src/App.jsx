@@ -10,6 +10,8 @@ import TrafficMonitor from './pages/TrafficMonitor';
 import ThreatDashboard from './pages/ThreatDashboard';
 import TopologyMap from './pages/TopologyMap';
 import GeoMap from './pages/GeoMap';
+import DeviceDiscovery from './pages/DeviceDiscovery';
+import CopilotWidget from './components/CopilotWidget';
 
 function Layout({ isDark, setIsDark, isConnected }) {
   return (
@@ -51,6 +53,9 @@ function Layout({ isDark, setIsDark, isConnected }) {
           <Outlet />
         </main>
       </div>
+
+      {/* Global AI Copilot */}
+      <CopilotWidget />
     </div>
   );
 }
@@ -69,6 +74,7 @@ function App() {
   const [livePackets, setLivePackets] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [threatAlerts, setThreatAlerts] = useState([]);
+  const [threatIntel, setThreatIntel] = useState({});
 
   // Fetch analytics overview periodically
   useEffect(() => {
@@ -113,6 +119,10 @@ function App() {
       setThreatAlerts(prev => [alert, ...prev]);
     });
 
+    socket.on('intel_update', (intel) => {
+      setThreatIntel(prev => ({ ...prev, [intel.ip]: intel }));
+    });
+
     return () => socket.disconnect();
   }, []);
 
@@ -126,12 +136,13 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<Layout isDark={isDark} setIsDark={setIsDark} isConnected={isConnected} />}>
-          <Route path="/" element={<Outlet context={{ analytics, livePackets, chartData, threatAlerts }} />}>
+          <Route path="/" element={<Outlet context={{ analytics, livePackets, chartData, threatAlerts, threatIntel }} />}>
             <Route index element={<Dashboard />} />
             <Route path="monitor" element={<TrafficMonitor />} />
             <Route path="database" element={<div className="p-8 text-text-muted">Database Connection configuration coming soon.</div>} />
             <Route path="topology" element={<TopologyMap />} />
             <Route path="geo" element={<GeoMap />} />
+            <Route path="devices" element={<DeviceDiscovery />} />
             <Route path="threats" element={<ThreatDashboard />} />
             <Route path="settings" element={<div className="p-8 text-text-muted">Settings coming soon.</div>} />
           </Route>

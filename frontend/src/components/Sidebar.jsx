@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Activity, Database, ShieldAlert, Settings, Share2, Map as MapIcon } from 'lucide-react';
+import { LayoutDashboard, Activity, Database, ShieldAlert, Settings, Share2, Map as MapIcon, Server } from 'lucide-react';
 
 export default function Sidebar() {
   const navItems = [
@@ -8,6 +8,7 @@ export default function Sidebar() {
     { name: 'Traffic Monitor', path: '/monitor', icon: Activity },
     { name: 'Network Topology', path: '/topology', icon: Share2 },
     { name: 'Geo-Intelligence', path: '/geo', icon: MapIcon },
+    { name: 'Network Devices', path: '/devices', icon: Server },
     { name: 'Database', path: '/database', icon: Database },
     { name: 'Security Center', path: '/threats', icon: ShieldAlert },
     { name: 'Settings', path: '/settings', icon: Settings },
@@ -36,10 +37,9 @@ export default function Sidebar() {
             key={item.name}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
-                isActive 
-                  ? 'bg-primary/10 text-primary font-medium' 
-                  : 'text-text-muted hover:bg-white/[0.03] dark:hover:bg-white/[0.03] hover:text-text-main'
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
+                ? 'bg-primary/10 text-primary font-medium'
+                : 'text-text-muted hover:bg-white/[0.03] dark:hover:bg-white/[0.03] hover:text-text-main'
               }`
             }
           >
