@@ -31,6 +31,8 @@ class PacketData(BaseModel):
     dst_port: Optional[int] = None
     size: int
     info: str
+    src_geo: Optional[dict] = None
+    dst_geo: Optional[dict] = None
 
 class AlertData(BaseModel):
     type: str

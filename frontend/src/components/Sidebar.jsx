@@ -1,13 +1,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Activity, Database, ShieldAlert, Settings } from 'lucide-react';
+import { LayoutDashboard, Activity, Database, ShieldAlert, Settings, Share2, Map as MapIcon } from 'lucide-react';
 
 export default function Sidebar() {
   const navItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
     { name: 'Traffic Monitor', path: '/monitor', icon: Activity },
+    { name: 'Network Topology', path: '/topology', icon: Share2 },
+    { name: 'Geo-Intelligence', path: '/geo', icon: MapIcon },
     { name: 'Database', path: '/database', icon: Database },
-    { name: 'Threat Detection', path: '/threats', icon: ShieldAlert },
+    { name: 'Security Center', path: '/threats', icon: ShieldAlert },
     { name: 'Settings', path: '/settings', icon: Settings },
   ];
 

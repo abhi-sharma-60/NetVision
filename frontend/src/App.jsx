@@ -8,6 +8,8 @@ import Dashboard from './pages/Dashboard';
 import TrafficMonitor from './pages/TrafficMonitor';
 
 import ThreatDashboard from './pages/ThreatDashboard';
+import TopologyMap from './pages/TopologyMap';
+import GeoMap from './pages/GeoMap';
 
 function Layout({ isDark, setIsDark, isConnected }) {
   return (
@@ -128,6 +130,8 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="monitor" element={<TrafficMonitor />} />
             <Route path="database" element={<div className="p-8 text-text-muted">Database Connection configuration coming soon.</div>} />
+            <Route path="topology" element={<TopologyMap />} />
+            <Route path="geo" element={<GeoMap />} />
             <Route path="threats" element={<ThreatDashboard />} />
             <Route path="settings" element={<div className="p-8 text-text-muted">Settings coming soon.</div>} />
           </Route>

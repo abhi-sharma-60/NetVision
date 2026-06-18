@@ -58,6 +58,7 @@ import os
 from analytics import analytics_engine
 from threat_detector import threat_detector
 from ml_engine import ml_engine
+from geo_lookup import geo_engine
 
 # Robust absolute paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -82,7 +83,9 @@ def store_packet(parsed_data):
         "dst_port": parsed_data["dst_port"],
         "protocol": parsed_data["protocol"],
         "size": parsed_data["size"],
-        "info": parsed_data["info"]
+        "info": parsed_data["info"],
+        "src_geo": geo_engine.get_geo(parsed_data["src_ip"]),
+        "dst_geo": geo_engine.get_geo(parsed_data["dst_ip"])
     }
     
     packet_store.append(metadata)

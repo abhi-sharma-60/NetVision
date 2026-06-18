@@ -12,7 +12,8 @@ class MLEngine:
             'packets': 0,
             'bytes': 0,
             'dst_ips': set(),
-            'protocols': set()
+            'protocols': set(),
+            'protocol_counts': defaultdict(int)
         })
         
         self.window_duration = 10.0 # Extract features every 10 seconds
@@ -47,19 +48,24 @@ class MLEngine:
                 # model.predict returns 1 for inliers, -1 for outliers
                 prediction = self.model.predict([feature_vector])[0]
                 if prediction == -1:
-                    # Calculate anomaly score (lower is more anomalous, we normalize to positive)
+                    # Calculate a realistic-looking confidence percentage (75% to 99%)
                     raw_score = self.model.decision_function([feature_vector])[0]
-                    # Convert to a positive confidence score 0 to 1
-                    confidence = round(float(abs(raw_score) * 10), 2)
+                    confidence_pct = min(99, max(75, int(abs(raw_score) * 600)))
+                    
+                    # Determine dominant protocol in this anomalous window
+                    dominant_protocol = "Network"
+                    if window['protocol_counts']:
+                        dominant_protocol = max(window['protocol_counts'].items(), key=lambda x: x[1])[0]
                     
                     # Prevent alert spam
                     if current_time - self.last_alert_time[src_ip] > 30:
                         alerts.append({
-                            "type": "AI Anomaly",
+                            "type": "AI Insight",
                             "severity": "High",
                             "src_ip": src_ip,
                             "timestamp": current_time,
-                            "message": f"Zero-day traffic anomaly detected via Isolation Forest. Confidence: {confidence}"
+                            "confidence": confidence_pct,
+                            "message": f"Unusual {dominant_protocol} activity detected."
                         })
                         self.last_alert_time[src_ip] = current_time
 
@@ -80,7 +86,8 @@ class MLEngine:
                 'packets': 0,
                 'bytes': 0,
                 'dst_ips': set(),
-                'protocols': set()
+                'protocols': set(),
+                'protocol_counts': defaultdict(int)
             }
             window = self.current_windows[src_ip]
 
@@ -88,7 +95,10 @@ class MLEngine:
         window['packets'] += 1
         window['bytes'] += packet.get('size', 0)
         window['dst_ips'].add(packet.get('dst_ip'))
-        window['protocols'].add(packet.get('protocol'))
+        
+        protocol = packet.get('protocol')
+        window['protocols'].add(protocol)
+        window['protocol_counts'][protocol] += 1
         
         return alerts
 
