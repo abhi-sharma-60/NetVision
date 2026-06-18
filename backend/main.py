@@ -32,6 +32,12 @@ class PacketData(BaseModel):
     size: int
     info: str
 
+class AlertData(BaseModel):
+    type: str
+    severity: str
+    src_ip: str
+    message: str
+
 # 2. Create the Socket.IO AsyncServer
 sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins='*')
 
@@ -45,6 +51,12 @@ async def disconnect(sid):
     print(f"Client disconnected: {sid}")
 
 # 4. FastAPI Routes
+@fastapi_app.post("/api/alert")
+async def receive_alert(alert: AlertData):
+    """Broadcasts a high-priority threat alert to connected clients"""
+    await sio.emit('threat_alert', alert.model_dump())
+    return {"status": "ok"}
+
 @fastapi_app.post("/api/ingest")
 async def ingest_packet(packet: PacketData):
     """Ingests a packet from the sniffer and broadcasts it via Socket.IO"""

@@ -56,6 +56,8 @@ import requests
 import json
 import os
 from analytics import analytics_engine
+from threat_detector import threat_detector
+from ml_engine import ml_engine
 
 # Robust absolute paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -88,6 +90,22 @@ def store_packet(parsed_data):
     
     # Export running totals for the FastAPI server to read instantly
     analytics_engine.export_summary(SUMMARY_FILE)
+
+    # Process packet for static threat rules
+    alerts = threat_detector.process_packet(metadata)
+    for alert in alerts:
+        try:
+            requests.post("http://localhost:8000/api/alert", json=alert, timeout=0.1)
+        except:
+            pass
+            
+    # Process packet for AI anomalies
+    ml_alerts = ml_engine.process_packet(metadata)
+    for alert in ml_alerts:
+        try:
+            requests.post("http://localhost:8000/api/alert", json=alert, timeout=0.1)
+        except:
+            pass
 
     # Push to API for real-time Socket.IO broadcast
     try:
