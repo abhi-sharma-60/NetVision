@@ -1,6 +1,7 @@
 import os
 import json
 import google.generativeai as genai
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -52,8 +53,19 @@ Always end your message by proactively asking if the user needs help with anythi
         try:
             response = self.model.generate_content(
                 f"{system_prompt}\nUser Query: {query}",
-                generation_config={"temperature": 0.2, "max_output_tokens": 500}
+                generation_config={"temperature": 0.2, "max_output_tokens": 500},
+                safety_settings={
+                    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+                }
             )
+            
+            # Check if it was truncated by MAX_TOKENS or SAFETY despite settings
+            if response.candidates and response.candidates[0].finish_reason != 1:
+                return response.text + f"\n\n*(Note: Output was truncated. Reason: {response.candidates[0].finish_reason})*"
+                
             return response.text
         except Exception as e:
             return f"Error connecting to AI Copilot: {str(e)}"
