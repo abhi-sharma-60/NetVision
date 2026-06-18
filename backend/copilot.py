@@ -1,32 +1,31 @@
 import os
 import json
-import google.generativeai as genai
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
+from groq import Groq
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialize Gemini
-API_KEY = os.getenv("GEMINI_API_KEY")
+# Initialize Groq
+API_KEY = os.getenv("GROQ_API_KEY")
 if API_KEY:
-    genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    client = Groq(api_key=API_KEY)
 else:
-    model = None
+    client = None
 
 class SecurityCopilot:
     def __init__(self):
-        self.model = model
+        self.client = client
 
     def ask(self, query: str, network_context: dict) -> str:
         """
-        Queries the Gemini LLM with the provided network context to answer the user's question.
+        Queries the Groq LLM (Llama 3) with the provided network context to answer the user's question.
         """
-        if not self.model:
-            return "Error: Gemini API Key is missing. Please configure GEMINI_API_KEY in backend/.env."
+        if not self.client:
+            return "Error: Groq API Key is missing. Please configure GROQ_API_KEY in backend/.env."
 
         # Format context into a readable string for the LLM
-        context_str = json.dumps(network_context, indent=2)
+        # Truncate context string to prevent exceeding Llama 3's 8192 token limit
+        context_str = json.dumps(network_context, indent=2)[:6000]
         
         system_prompt = f"""You are NetVision AI, a cybersecurity network copilot.
 You have access to the following live metrics:
@@ -40,7 +39,7 @@ Top Talker IPs:
 {json.dumps(network_context.get('traffic_analytics', {}).get('top_talkers', [])[:10], indent=2)}
 
 Recent Alerts:
-{json.dumps(network_context.get('recent_alerts', []), indent=2)}
+{json.dumps(network_context.get('recent_alerts', [])[:10], indent=2)}
 
 Answer the user's query clearly and concisely based on this data. If there are no threats, explicitly state that the network is currently secure.
 Always end your message by proactively asking if the user needs help with anything else or wants to type a custom request.
@@ -51,22 +50,17 @@ Always end your message by proactively asking if the user needs help with anythi
 """
         
         try:
-            response = self.model.generate_content(
-                f"{system_prompt}\nUser Query: {query}",
-                generation_config={"temperature": 0.2, "max_output_tokens": 500},
-                safety_settings={
-                    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-                    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-                    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-                    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-                }
+            response = self.client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": query}
+                ],
+                model="llama-3.3-70b-versatile",
+                temperature=0.2,
+                max_tokens=500,
             )
-            
-            # Check if it was truncated by MAX_TOKENS or SAFETY despite settings
-            if response.candidates and response.candidates[0].finish_reason != 1:
-                return response.text + f"\n\n*(Note: Output was truncated. Reason: {response.candidates[0].finish_reason})*"
                 
-            return response.text
+            return response.choices[0].message.content
         except Exception as e:
             return f"Error connecting to AI Copilot: {str(e)}"
 
