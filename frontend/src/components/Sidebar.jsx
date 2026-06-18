@@ -9,24 +9,22 @@ export default function Sidebar() {
     { name: 'Network Topology', path: '/topology', icon: Share2 },
     { name: 'Geo-Intelligence', path: '/geo', icon: MapIcon },
     { name: 'Network Devices', path: '/devices', icon: Server },
-    { name: 'Database', path: '/database', icon: Database },
     { name: 'Security Center', path: '/threats', icon: ShieldAlert },
-    { name: 'Settings', path: '/settings', icon: Settings },
   ];
 
   return (
     <aside className="w-64 bg-surface border-r border-border h-full flex flex-col hidden md:flex">
       {/* Logo */}
       <div className="h-20 flex items-center px-6 border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-primary/20 rounded-xl">
+        <NavLink to="/" className="flex items-center gap-3 cursor-pointer group">
+          <div className="p-2.5 bg-primary/20 rounded-xl group-hover:bg-primary/30 transition-colors">
             <Activity className="text-primary w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-text-main tracking-tight leading-none">NetVision AI</h1>
+            <h1 className="text-xl font-bold text-text-main tracking-tight leading-none group-hover:text-primary transition-colors">NetVision AI</h1>
             <span className="text-[10px] text-text-muted uppercase tracking-widest font-medium">Enterprise</span>
           </div>
-        </div>
+        </NavLink>
       </div>
 
       {/* Navigation */}
@@ -53,18 +51,6 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Profile / Bottom */}
-      <div className="p-4 border-t border-border/50">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/[0.03] cursor-pointer transition-colors">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm">
-            AS
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-text-main truncate">Admin User</p>
-            <p className="text-xs text-text-muted truncate">Security Analyst</p>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 }

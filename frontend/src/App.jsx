@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
-import { Moon, Sun, Bell } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { io } from 'socket.io-client';
 
 import Sidebar from './components/Sidebar';
@@ -32,10 +32,7 @@ function Layout({ isDark, setIsDark, isConnected }) {
             </div>
 
             <div className="flex items-center gap-3">
-              <button className="p-2 rounded-full hover:bg-white/[0.05] text-text-muted hover:text-text-main transition-colors relative">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full border border-surface"></span>
-              </button>
+
 
               <button
                 onClick={() => setIsDark(!isDark)}
@@ -139,12 +136,10 @@ function App() {
           <Route path="/" element={<Outlet context={{ analytics, livePackets, chartData, threatAlerts, threatIntel }} />}>
             <Route index element={<Dashboard />} />
             <Route path="monitor" element={<TrafficMonitor />} />
-            <Route path="database" element={<div className="p-8 text-text-muted">Database Connection configuration coming soon.</div>} />
             <Route path="topology" element={<TopologyMap />} />
             <Route path="geo" element={<GeoMap />} />
             <Route path="devices" element={<DeviceDiscovery />} />
             <Route path="threats" element={<ThreatDashboard />} />
-            <Route path="settings" element={<div className="p-8 text-text-muted">Settings coming soon.</div>} />
           </Route>
         </Route>
       </Routes>
