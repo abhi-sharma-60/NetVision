@@ -5,6 +5,7 @@
   <p><strong>Intelligent Network Monitoring & Threat Detection Platform</strong></p>
 
   <p>
+    <a href="https://drive.google.com/file/d/1pWJb7Q1wxUJ1dY_mOEWblPv1iP84Y0iZ/view?usp=sharing"><strong>🎥 Watch Demo Video</strong></a><br/><br/>
     <a href="#features">Features</a> •
     <a href="#tech-stack">Tech Stack</a> •
     <a href="#architecture">Architecture</a> •
@@ -114,7 +115,7 @@ npm install
 
 ## 🚦 Usage
 
-You will need two terminal windows to run the application.
+You will need three terminal windows to run the application.
 
 **Terminal 1: Start the Backend Sniffer**
 *(Note: Packet capture requires administrative/root privileges)*
@@ -124,7 +125,14 @@ source venv/bin/activate
 sudo python3 sniffer.py
 ```
 
-**Terminal 2: Start the Frontend UI**
+**Terminal 2: Start the Backend API Server**
+```bash
+cd backend
+source venv/bin/activate
+uvicorn main:app --reload --port 8000
+```
+
+**Terminal 3: Start the Frontend UI**
 ```bash
 cd frontend
 npm run dev
